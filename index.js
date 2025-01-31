@@ -41,7 +41,8 @@ async function run() {
         await client.connect();
 
         const architectureWorksCollection = client.db('architectureWebsiteDB').collection('works');
-
+        const architectureMembersCollection = client.db('architectureWebsiteDB').collection('members');
+        ///--------Works api------------///
         app.get('/works', async (req, res) => {
             const type = req.query.type;
             let query = {};
@@ -60,6 +61,30 @@ async function run() {
             // console.log(result);
         })
 
+
+
+        app.put('/works/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const option = { upsert: true };
+            const updatedWork = req.body;
+            const work = {
+                $set: {
+                    pName: updatedWork.name, type: updatedWork.projectType, topImage: updatedWork.topimage, year: updatedWork.yeaR, location: updatedWork.locatioN, creativeDirector: updatedWork.creativedirector, visualization: updatedWork.visualizatioN, aboutImage: updatedWork.aboutimage, aboutDescription: updatedWork.aboutdescription, designImage: updatedWork.designimage, designDescription: updatedWork.designdescription, img1: updatedWork.img11,
+                    img2: updatedWork.img22, img3: updatedWork.img33, img4: updatedWork.img44, img5: updatedWork.img55, img6: updatedWork.img66, img7: updatedWork.img77, img8: updatedWork.img88
+                }
+            }
+            const result = await architectureWorksCollection.updateOne(filter, work, option);
+            res.send(result);
+
+        })
+
+        app.post('/works', async (req, res) => {
+            const newWork = req.body;
+            const result = await architectureWorksCollection.insertOne(newWork);
+            res.send(result);
+        })
+
         app.delete('/works/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
@@ -67,6 +92,52 @@ async function run() {
             console.log(result);
             res.send(result);
         })
+        //---------------About apis---------------//
+
+        app.get('/members', async (req, res) => {
+            const cursor = architectureMembersCollection.find();
+            const result = await cursor.toArray();
+            res.send(result);
+
+        })
+
+        app.get('/members/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await architectureMembersCollection.findOne(query);
+            res.send(result)
+            console.log(result)
+        })
+
+        app.post('/members', async (req, res) => {
+            const newMember = req.body;
+            const result = await architectureMembersCollection.insertOne(newMember);
+            res.send(result);
+        })
+
+        app.put('/members/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) };
+            const option = { upsert: true };
+            const updatedMember = req.body;
+            const member = {
+                $set: {
+                    name: updatedMember.name, designation: updatedMember.designation, image: updatedMember.image
+                }
+            }
+            const result = await architectureMembersCollection.updateOne(filter, member, option);
+            res.send(result);
+
+        })
+
+        app.delete('/members/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: new ObjectId(id) };
+            const result = await architectureMembersCollection.deleteOne(query);
+            res.send(result)
+        })
+
+
 
 
 
@@ -89,3 +160,5 @@ app.get('/', (req, res) => {
 app.listen(port, () => {
     console.log(`Architecture is running at port:${port}`);
 })
+
+// https://artchitecture-website-server.onrender.com/
