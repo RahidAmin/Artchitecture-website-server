@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+
 require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 5000;
@@ -14,7 +15,8 @@ app.use(cors({
         'https://architecture-website-ff3ae.firebaseapp.com',
         'https://comforting-strudel-8964e3.netlify.app'
 
-    ]
+    ],
+
 }));
 app.use(express.json());
 
@@ -34,6 +36,10 @@ const client = new MongoClient(uri, {
     }
 });
 
+
+
+
+
 async function run() {
     try {
         // Connect the client to the server	(optional starting in v4.7)
@@ -42,6 +48,12 @@ async function run() {
 
         const architectureWorksCollection = client.db('architectureWebsiteDB').collection('works');
         const architectureMembersCollection = client.db('architectureWebsiteDB').collection('members');
+
+
+        //-----Auth related api----//
+
+
+
         ///--------Works api------------///
         app.get('/works', async (req, res) => {
             const type = req.query.type;
