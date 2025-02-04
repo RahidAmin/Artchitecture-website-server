@@ -13,7 +13,10 @@ app.use(cors({
         'http://localhost:5173',
         'https://architecture-website-ff3ae.web.app',
         'https://architecture-website-ff3ae.firebaseapp.com',
-        'https://comforting-strudel-8964e3.netlify.app'
+        'https://comforting-strudel-8964e3.netlify.app',
+        'https://www.simplesymmetry-bd.com/',
+        'simplesymmetry-bd.com ',
+
 
     ],
 
