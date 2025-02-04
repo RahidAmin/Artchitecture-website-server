@@ -168,7 +168,9 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await architectureMembersCollection.deleteOne(query);
+            console.log('deleted')
             res.send(result)
+
         })
 
 
@@ -196,3 +198,5 @@ app.listen(port, () => {
 })
 
 // https://artchitecture-website-server.onrender.com/
+
+
