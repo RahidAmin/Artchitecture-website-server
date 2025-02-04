@@ -16,6 +16,7 @@ app.use(cors({
         'https://comforting-strudel-8964e3.netlify.app',
         'https://www.simplesymmetry-bd.com/',
         'simplesymmetry-bd.com ',
+        'api.simplesymmetry-bd.com'
 
 
     ],
