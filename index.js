@@ -1,5 +1,10 @@
 const express = require('express');
 const cors = require('cors');
+const multer = require('multer');
+const path = require('path');
+
+
+
 
 require('dotenv').config();
 const app = express();
@@ -41,6 +46,10 @@ app.use(cors({
 
 // }));
 app.use(express.json());
+app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
+
 
 
 
@@ -59,6 +68,46 @@ const client = new MongoClient(uri, {
 });
 
 
+
+const UPLOADS_FOLDER = './uploads/';
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, UPLOADS_FOLDER);
+    },
+    filename: (req, file, cb) => {
+        const fileExt = path.extname(file.originalname);
+        const fileName = file.originalname.replace(fileExt, "").toLowerCase().split(" ").join("-") + "-" + Date.now();
+        cb(null, fileName + fileExt)
+    }
+
+})
+
+
+
+var upload = multer(
+    {
+        storage: storage,
+
+        fileFilter: (req, file, cb) => {
+            console.log(file)
+
+            if (
+                file.mimetype === "image/png" ||
+                file.mimetype === "image/jpg" ||
+                file.mimetype === "image/jpeg" ||
+                file.mimetype === "image/webp"
+            ) {
+                cb(null, true);
+            }
+            else {
+                cb(null, false)
+            }
+
+
+        }
+    }
+)
 
 
 
@@ -113,11 +162,59 @@ async function run() {
 
         })
 
-        app.post('/works', async (req, res) => {
-            const newWork = req.body;
-            const result = await architectureWorksCollection.insertOne(newWork);
-            res.send(result);
-        })
+        // app.post('/works', async (req, res) => {
+        //     const newWork = req.body;
+        //     const result = await architectureWorksCollection.insertOne(newWork);
+        //     res.send(result);
+        // })
+
+
+        app.post('/works', upload.fields([
+            { name: 'img1', maxCount: 1 },
+            { name: 'img2', maxCount: 1 },
+            { name: 'img3', maxCount: 1 },
+            { name: 'img4', maxCount: 1 },
+            { name: 'img5', maxCount: 1 },
+            { name: 'img6', maxCount: 1 },
+            { name: 'img7', maxCount: 1 },
+            { name: 'img8', maxCount: 1 },
+            { name: 'aboutImage', maxCount: 1 },
+            { name: 'designImage', maxCount: 1 },
+            { name: 'topImage', maxCount: 1 },
+        ]), async (req, res) => {
+            try {
+                const { pName, type, year, location, creativeDirector, visualization, aboutDescription, designDescription } = req.body;
+
+                // Convert relative paths to full URLs
+                const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+                const topImage = req.files?.topImage ? `${baseUrl}/uploads/${req.files.topImage[0].filename}` : null;
+                const img1 = req.files?.img1 ? `${baseUrl}/uploads/${req.files.img1[0].filename}` : null;
+                const img2 = req.files?.img2 ? `${baseUrl}/uploads/${req.files.img2[0].filename}` : null;
+                const img3 = req.files?.img3 ? `${baseUrl}/uploads/${req.files.img3[0].filename}` : null;
+                const img4 = req.files?.img4 ? `${baseUrl}/uploads/${req.files.img4[0].filename}` : null;
+                const img5 = req.files?.img5 ? `${baseUrl}/uploads/${req.files.img5[0].filename}` : null;
+                const img6 = req.files?.img6 ? `${baseUrl}/uploads/${req.files.img6[0].filename}` : null;
+                const img7 = req.files?.img7 ? `${baseUrl}/uploads/${req.files.img7[0].filename}` : null;
+                const img8 = req.files?.img8 ? `${baseUrl}/uploads/${req.files.img8[0].filename}` : null;
+                const aboutImage = req.files?.aboutImage ? `${baseUrl}/uploads/${req.files.aboutImage[0].filename}` : null;
+                const designImage = req.files?.designImage ? `${baseUrl}/uploads/${req.files.designImage[0].filename}` : null;
+
+                const newWork = {
+                    pName, type, year, location, creativeDirector, visualization, aboutDescription, designDescription,
+                    img1, img2, img3, img4, img5, img6, img7, img8, aboutImage, designImage, topImage
+                };
+
+                const result = await architectureWorksCollection.insertOne(newWork);
+                res.status(201).json(result);
+            } catch (error) {
+                console.error("Error uploading images:", error);
+                res.status(500).json({ message: "Internal server error" });
+            }
+        });
+
+
+
 
         app.delete('/works/:id', async (req, res) => {
             const id = req.params.id;
@@ -143,11 +240,21 @@ async function run() {
             console.log(result)
         })
 
-        app.post('/members', async (req, res) => {
-            const newMember = req.body;
+        app.post('/members', upload.fields([{ name: "image", maxCount: 1 }]), async (req, res) => {
+            const baseUrl = `${req.protocol}://${req.get('host')}`;
+
+            const { name, designation, description } = req.body;
+            const image = req.files?.image ? `${baseUrl}/uploads/${req.files.image[0].filename}` : null;
+            const newMember = { name, designation, image, description };
             const result = await architectureMembersCollection.insertOne(newMember);
-            res.send(result);
+            res.json(result)
         })
+
+        // app.post('/members', async (req, res) => {
+        //     const newMember = req.body;
+        //     const result = await architectureMembersCollection.insertOne(newMember);
+        //     res.send(result);
+        // })
 
         app.put('/members/:id', async (req, res) => {
             const id = req.params.id;
