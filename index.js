@@ -197,9 +197,6 @@ async function run() {
 
 
 
-
-
-
         app.delete('/works/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
@@ -230,7 +227,7 @@ async function run() {
             const newMember = { name, designation, image, description };
             const result = await architectureMembersCollection.insertOne(newMember);
             res.send(result);
-            res.json(result)
+
         })
 
         // app.post('/members', async (req, res) => {
