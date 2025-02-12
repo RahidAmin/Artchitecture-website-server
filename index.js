@@ -26,9 +26,13 @@ app.use(cors({
 
     ], credentials: true,
 
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization']
+
+
 }));
 
-
+app.use(cors());
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
@@ -73,6 +77,9 @@ const storage = multer.diskStorage({
 var upload = multer(
     {
         storage: storage,
+        limits: {
+            fieldSize: 900000000
+        },
 
         fileFilter: (req, file, cb) => {
             console.log(file)
