@@ -39,6 +39,8 @@ app.use('/uploads', express.static('uploads'));
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+app.use(express.json({ limit: '100mb' }));
+app.use(express.urlencoded({ limit: '100mb', extended: true }));
 
 
 
@@ -78,7 +80,7 @@ var upload = multer(
     {
         storage: storage,
         limits: {
-            fieldSize: 900000000
+            fileSize: 50 * 1024 * 1024
         },
 
         fileFilter: (req, file, cb) => {
