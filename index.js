@@ -3,6 +3,9 @@ const cors = require('cors');
 const multer = require('multer');
 const path = require('path');
 
+const fs = require('fs');
+
+
 
 
 
@@ -32,7 +35,7 @@ app.use(cors({
 
 }));
 
-app.use(cors());
+
 
 app.use(express.json());
 app.use('/uploads', express.static('uploads'));
@@ -205,14 +208,40 @@ async function run() {
 
 
 
-
         app.delete('/works/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
-            const result = await architectureWorksCollection.deleteOne(query);
-            console.log(result);
-            res.send(result);
-        })
+
+            try {
+                // Find the work entry
+                const work = await architectureWorksCollection.findOne(query);
+                if (!work) return res.status(404).json({ message: "Work not found" });
+
+                // Delete images
+                Object.values(work).forEach(value => {
+                    if (typeof value === 'string' && value.includes('/uploads/')) {
+                        const filePath = path.join(__dirname, value.replace(`${req.protocol}://${req.get('host')}/`, ''));
+                        if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
+                    }
+                });
+
+                // Delete document from database
+                await architectureWorksCollection.deleteOne(query);
+                res.json({ message: "Work deleted successfully" });
+
+            } catch (error) {
+                console.error("Error deleting work:", error);
+                res.status(500).json({ message: "Internal Server Error" });
+            }
+        });
+
+        // app.delete('/works/:id', async (req, res) => {
+        //     const id = req.params.id;
+        //     const query = { _id: new ObjectId(id) };
+        //     const result = await architectureWorksCollection.deleteOne(query);
+        //     console.log(result);
+        //     res.send(result);
+        // })
         //---------------About apis---------------//
 
         app.get('/members', async (req, res) => {
@@ -227,7 +256,7 @@ async function run() {
             const query = { _id: new ObjectId(id) };
             const result = await architectureMembersCollection.findOne(query);
             res.send(result)
-            console.log(result)
+
         })
         app.post('/members', upload.fields([{ name: "image", maxCount: 1 }]), async (req, res) => {
             const baseUrl = `${req.protocol}://${req.get('host')}`;
@@ -264,7 +293,7 @@ async function run() {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) };
             const result = await architectureMembersCollection.deleteOne(query);
-            console.log('deleted')
+
             res.send(result)
 
         })
